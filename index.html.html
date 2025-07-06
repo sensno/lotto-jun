@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>로또 조합 생성기</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; background: #f9fafb; }
+    button { padding: 10px 20px; font-size: 16px; background: #3b82f6; color: white; border: none; border-radius: 8px; cursor: pointer; }
+    #output { margin-top: 30px; display: flex; flex-direction: column; gap: 15px; align-items: center; }
+    .ball { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; color: white; font-weight: bold; margin: 0 5px; }
+    .yellow { background: #facc15; }
+    .blue { background: #3b82f6; }
+    .red { background: #ef4444; }
+    .gray { background: #6b7280; }
+    .green { background: #22c55e; }
+    .orange { background: #f97316; }
+  </style>
+  <script>
+    function getBallColor(num) {
+      if (num <= 10) return 'yellow';
+      if (num <= 20) return 'blue';
+      if (num <= 30) return 'red';
+      if (num <= 40) return 'gray';
+      return 'green';
+    }
+
+    function generateLotto() {
+      const result = [];
+      while (result.length < 6) {
+        const num = Math.floor(Math.random() * 45) + 1;
+        if (!result.includes(num)) {
+          result.push(num);
+        }
+      }
+      result.sort((a, b) => a - b);
+      return result;
+    }
+
+    function checkConditions(numbers) {
+      let odd = numbers.filter(n => n % 2 === 1).length;
+      let even = 6 - odd;
+      if (!(odd === 3 && even === 3)) return false;
+
+      let g1 = numbers.filter(n => n >= 1 && n <= 10);
+      let g2 = numbers.filter(n => n >= 11 && n <= 20);
+      let g3 = numbers.filter(n => n >= 21 && n <= 30);
+      let g4 = numbers.filter(n => n >= 31 && n <= 40);
+
+      if (g1.length < 1 || g2.length < 1 || g3.length < 1 || g4.length < 1) return false;
+
+      let tails = numbers.map(n => n % 10);
+      let tailMax = Math.max(...tails.map(t => tails.filter(x => x === t).length));
+      if (tailMax > 2) return false;
+
+      return true;
+    }
+
+    function generateFilteredLotto() {
+      let numbers;
+      do {
+        numbers = generateLotto();
+      } while (!checkConditions(numbers));
+      return numbers;
+    }
+
+    function generateSets() {
+      const output = document.getElementById("output");
+      output.innerHTML = "";
+      for (let i = 0; i < 5; i++) {
+        const nums = generateFilteredLotto();
+        const div = document.createElement("div");
+        nums.forEach(n => {
+          const ball = document.createElement("span");
+          ball.className = "ball " + getBallColor(n);
+          ball.textContent = n;
+          div.appendChild(ball);
+        });
+        output.appendChild(div);
+      }
+    }
+  </script>
+</head>
+<body>
+  <h1>로또 조합 생성기</h1>
+  <button onclick="generateSets()">5개 조합 생성</button>
+  <div id="output"></div>
+</body>
+</html>
